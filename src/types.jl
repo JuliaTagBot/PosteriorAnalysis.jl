@@ -1,32 +1,37 @@
-immutable PosteriorDraws{T}
+@auto_hash_equals immutable PosteriorDraws{T}
     len::Int
     keys::Vector{Symbol}
     vars::Vector{T}
-    function PosteriorDraws(len, keys, vars)
+    function PosteriorDraws{T}(len::Int, keys::Vector{Symbol}, vars::Vector{T})
         allunique(keys) || error(ArgumentError("Duplicate keys."))
         length(keys) == length(vars) ||
             error(ArgumentError("Non-conforming keys and vars."))
         all(length(var) == len for var in vars) ||
             error("Non-conformable lengths")
-        new(keys, vars)
+        new{T}(len, keys, vars)
     end
+end
+
+function PosteriorDraws{T}(len::Int, keys::Vector{Symbol}, vars::Vector{T})
+    PosteriorDraws{T}(len, keys, vars)
 end
 
 PosteriorDraws(len::Int) = PosteriorDraws(len, Symbol[], Any[])
 
-function PosteriorDraws(keys::AbstractVector{Symbol}, vars)
+function PosteriorDraws{T}(keys::Vector{Symbol}, vars::Vector{T})
     length(vars) ≥ 1 ||
         error(ArgumentError("Need at least one variable to determine length."))
     PosteriorDraws(length(vars[1]), keys, vars)
 end
 
 function PosteriorDraws{T}(key_var_pairs::Pair{Symbol, T}...)
-    PosteriorDraws(first.(key_var_pairs), last.(key_var_pairs))
+    PosteriorDraws(first.([key_var_pairs...]), last.([key_var_pairs...]))
 end
 
 keys(pd::PosteriorDraws) = pd.keys
 
-size(pd::PosteriorDraws) = (length(pd.keys), len)
+size(pd::PosteriorDraws) = (length(pd.keys), pd.len)
+size(pd::PosteriorDraws, index) = size(pd)[index]
 
 "Return the type of draws in a chain."
 drawtype{T}(chain::AbstractVector{T}) = T
@@ -46,12 +51,13 @@ function _key2index(pd::PosteriorDraws, keys::Vector{Symbol})
 end
 
 function _key2index(pd::PosteriorDraws, key::Symbol)
-    index = findfirst(pd.keys, name)
+    index = findfirst(pd.keys, key)
     index == 0 && error(ArgumentError("Variable $(key) not found"))
+    index
 end
 
 function getindex(pd::PosteriorDraws, keys)
-    keyinds = key2index(keys)
+    keyinds = _key2index(pd, keys)
     if isa(keyinds, Int)
         pd.vars[keyinds]
     else
@@ -60,7 +66,7 @@ function getindex(pd::PosteriorDraws, keys)
 end
 
 function getindex(pd::PosteriorDraws, keys, drawinds)
-    keyinds = key2index(keys)
+    keyinds = _key2index(pd, keys)
     if isa(keyinds, Int)
         pd.vars[keyinds][drawinds]
     else
@@ -68,4 +74,3 @@ function getindex(pd::PosteriorDraws, keys, drawinds)
                        [var[drawinds] for var in pd.vars[keyinds]])
     end
 end
-    

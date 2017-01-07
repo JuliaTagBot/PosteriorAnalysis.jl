@@ -1,36 +1,32 @@
-"Insert variables into `pd`, names by the given keys in `key => var` pairs."
-function addvars!{T}(pd::PosteriorDraws, key_var_pairs::Pair{Symbol, T}...)
-    newkeys = [pd.keys; first.(key_var_pairs)]
-    @assert allunique(newkeys) "Duplicate keys."
-    pd.keys = newkeys
-    pd.vars = [pd.vars; last.(key_var_pairs)]
-    pd
+"Concatenate posterior draws for different variables."
+function vcat(pds::PosteriorDraws...)
+    isempty(pds) && error("Need at least one argument.")
+    PosteriorDraws(pds[1].len,
+                   vcat([pd.keys for pd in pds]...),
+                   vcat([pd.vars for pd in pds]...))
 end
 
 "Add variables to `pd`, names by the given keys in `key => var` pairs."
-addvars(pd::PosteriorDraws, key_var_pairs) = addvars!(copy(pd), key_var_pairs...)
-
-"Delete the variables named by `keys` from `pd`."
-function dropvars!(pd::PosteriorDraws, keys...)
-    keep = setdiff(1:length(pd, vars), key2index(keys))
-    pd.keys = pd.keys[keep]
-    pd.vars = pd.vars[keep]
-    pd
+function addvars{T}(pd::PosteriorDraws, key_var_pairs::Pair{Symbol, T}...)
+    vcat(pd, PosteriorDraws(key_var_pairs...))
 end
 
 "Return `pd` without the variables names by `keys`."
-dropvars(pd::PosteriorDraws, keys...) = dropvars!(copy(pd), keys...)
-
-""
-function map!(pd::PosteriorDraws, result_key::Symbol, f, keys::Symbol...)
-    result_key ∈ pd.keys ||
-        error(ArgumentError("Can't overwrite an existing variable."))
-    addvars!(pd, result_key =>
-             map(f, vectorview.(pd.vars[key2indexes(pd, keys)])))
+function dropvars(pd::PosteriorDraws, keys...)
+    keep = setdiff(1:size(pd, 1), _key2index(pd, [keys...]))
+    PosteriorDraws(pd.len, pd.keys[keep], pd.vars[keep])
 end
 
-map(pd::PosteriorDraws, result_key::Symbol, f, keys::Symbol...) =
-    map!(copy(pd), result_key, f, keys)
+"""
+Map variables for `keys` by `f`, add the result with `result_key` to `pd`.
+"""
+function map(pd::PosteriorDraws, result_key::Symbol, f, keys::Symbol...)
+    result_key ∈ pd.keys &&
+        error(ArgumentError("Can't overwrite an existing variable."))
+    vars = pd.vars[_key2index(pd, [keys...])]
+    vectors = map(vectorview, vars)
+    addvars(pd, result_key => map(f, vars...))
+end
 
 """
 Transform expression by replacing each `@v(symbol)` with a gensym, and
@@ -57,6 +53,9 @@ function _transform_expr(expr)
     (_transform_expr(expr, captured_names), captured_names)
 end
 
+"""
+Helper function that creates the body of the @pdmap macro.
+"""
 function _map_helper(key_and_form_pair)
     (result_key, form) = @match key_and_form_pair begin
         (key_ => form_) => (key, form)
@@ -78,12 +77,5 @@ where `newvar` will contain the result, while the `@v` forms are
 parsed by a codewalker which generates the appropriate syntax for map.
 """
 macro pdmap(pd, key_and_form_pair)
-    :(map($pd, $(_map_helper(key_and_form_pair)...)))
-end
-
-"""
-Similar to `@pdmap` (see documentation for that), but calls `map!`.
-"""
-macro pdmap!(pd, key_and_form_pair)
-    :(map!($pd, $(_map_helper(key_and_form_pair)...)))
+    :(map($(esc(pd)), $(_map_helper(key_and_form_pair)...)))
 end

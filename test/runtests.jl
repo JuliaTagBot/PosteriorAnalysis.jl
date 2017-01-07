@@ -49,4 +49,27 @@ end
 # test operations
 ######################################################################
 
-pd = PosteriorDraws(:a => [1:3], :b => [4:6])
+a = 1:3
+b = 4:6
+pd_z = PosteriorDraws(length(a))
+pd_a = PosteriorDraws(:a => 1:3)
+pd_ab = PosteriorDraws([:a,:b], [a,b])
+
+@test size(pd_ab) == (2, length(a))
+@test keys(pd_ab) == [:a,:b]
+
+@test addvars(pd_a, :b => b) == pd_ab
+@test addvars(pd_z, :a => a, :b => b) == pd_ab
+@test vcat(pd_z, pd_ab) == pd_ab
+@test dropvars(pd_ab, :b) == pd_a
+
+@test pd_ab[:a] == a
+@test pd_ab[:a,2:3] == a[2:3]
+
+pd_abc0 = addvars(pd_ab, :c => collect(a+b))
+pd_abc1 = map(pd_ab, :c, +, :a, :b)
+pd_abc2 = @pdmap pd_ab c => @v(a) + @v(b)
+
+@test pd_abc0 == pd_abc1
+@test pd_abc0 == pd_abc2
+

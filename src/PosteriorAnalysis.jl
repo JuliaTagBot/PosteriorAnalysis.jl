@@ -1,8 +1,9 @@
 module PosteriorAnalysis
 
 using MacroTools
+using AutoHashEquals
 
-import Base: getindex, keys, size, map, map!
+import Base: getindex, keys, size, map, vcat
 
 export
     # types
@@ -17,7 +18,6 @@ export
     @pdmap,
     @pdmap!
 
-include("utilities.jl")
 include("types.jl")
 include("operations.jl")
 
