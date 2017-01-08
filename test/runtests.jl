@@ -73,3 +73,10 @@ pd_abc2 = @pdmap pd_ab c => @v(a) + @v(b)
 @test pd_abc0 == pd_abc1
 @test pd_abc0 == pd_abc2
 
+io = IOBuffer()
+@test (show(io, pd_ab); true)
+@test takebuf_string(io) ==
+    """PosteriorDraws with 3 observations
+    a => Int64
+    b => Int64
+"""

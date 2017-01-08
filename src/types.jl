@@ -42,6 +42,13 @@ function PosteriorDraws{T}(key_var_pairs::Pair{Symbol, T}...)
     PosteriorDraws(first.([key_var_pairs...]), last.([key_var_pairs...]))
 end
 
+function show(io::IO, pd::PosteriorDraws)
+    println(io, "PosteriorDraws with $(pd.len) observations")
+    for (key,var) in zip(pd.keys, pd.vars)
+        println(io, "    $(key) => $(vartype(var))")
+    end
+end
+
 keys(pd::PosteriorDraws) = pd.keys
 
 size(pd::PosteriorDraws) = (length(pd.keys), pd.len)

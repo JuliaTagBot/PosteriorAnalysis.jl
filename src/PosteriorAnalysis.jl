@@ -4,7 +4,7 @@ using MacroTools
 using Iterators
 using AutoHashEquals
     
-import Base: getindex, keys, size, map, vcat
+import Base: getindex, keys, size, map, vcat, show
 
 export
     # types
