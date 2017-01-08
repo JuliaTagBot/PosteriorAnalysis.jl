@@ -1,8 +1,9 @@
 module PosteriorAnalysis
 
 using MacroTools
+using Iterators
 using AutoHashEquals
-
+    
 import Base: getindex, keys, size, map, vcat
 
 export
@@ -12,12 +13,10 @@ export
     vectorview,
     # operations
     addvars,
-    addvars!,
     dropvars,
-    dropvars!,
-    @pdmap,
-    @pdmap!
+    @pdmap
 
+include("vars.jl")
 include("types.jl")
 include("operations.jl")
 
