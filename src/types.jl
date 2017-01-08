@@ -61,6 +61,8 @@ function _key2index(pd::PosteriorDraws, keys::Vector{Symbol})
     [_key2index(pd, key) for key in keys]
 end
 
+_key2index(pd::PosteriorDraws, ::Colon) = indices(pd.keys,1)
+
 function getindex(pd::PosteriorDraws, keys)
     keyinds = _key2index(pd, keys)
     if isa(keyinds, Int)
@@ -79,3 +81,5 @@ function getindex(pd::PosteriorDraws, keys, drawinds)
                        [var[drawinds] for var in pd.vars[keyinds]])
     end
 end
+
+ndims(pd::PosteriorDraws) = 2

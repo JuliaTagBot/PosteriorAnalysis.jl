@@ -5,7 +5,7 @@ using Iterators
 using AutoHashEquals
 using Requires
     
-import Base: getindex, keys, size, map, vcat, show
+import Base: getindex, keys, size, map, vcat, show, ndims
 
 export
     # vars
