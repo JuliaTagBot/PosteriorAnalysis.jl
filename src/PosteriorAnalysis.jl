@@ -21,7 +21,6 @@ export
     dropvars,
     @pdmap
 
-include("vars.jl")
 include("types.jl")
 include("operations.jl")
 @require Mamba include("mamba.jl")

@@ -24,7 +24,6 @@ function map(pd::PosteriorDraws, result_key::Symbol, f, keys::Symbol...)
     result_key ∈ pd.keys &&
         error(ArgumentError("Can't overwrite an existing variable."))
     vars = pd.vars[_key2index(pd, [keys...])]
-    vectors = map(vectorview, vars)
     addvars(pd, result_key => map(f, vars...))
 end
 
@@ -65,7 +64,7 @@ function _map_helper(key_and_form_pair)
     arguments = :($([gensym_ for (_, gensym_) in captured_names]...),)
     closure = :($arguments -> $(transformed_form))
     keys = [Meta.quot(varname) for (varname, _) in captured_names]
-    (Meta.quot(result_key), closure, keys...)
+    (Meta.quot(result_key), esc(closure), keys...)
 end
 
 """
