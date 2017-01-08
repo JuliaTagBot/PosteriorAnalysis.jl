@@ -9,7 +9,7 @@ isstandardized(v) = false       # default
 
 """
 `standardize` converts to one of the internal representation
-formats. The default is `Vector`.
+formats. The fallback is `Vector`.
 """
 standardize(v::AbstractVector) = collect(v)
 
@@ -19,9 +19,6 @@ standardize(v::Vector) = v
 
 "Type of draws for a variable."
 vartype{T}(var::Vector{T}) = T
-
-"Size of draws for a variable."
-varsize(var::Vector) = ()
 
 """
 Return the draws in a `var` as an `AbstractVector`. This may share
