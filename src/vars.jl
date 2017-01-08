@@ -17,8 +17,11 @@ isstandardized(v::Vector) = true
 
 standardize(v::Vector) = v
 
-"Return the type of draws for a variable."
+"Type of draws for a variable."
 vartype{T}(var::Vector{T}) = T
+
+"Size of draws for a variable."
+varsize(var::Vector) = ()
 
 """
 Return the draws in a `var` as an `AbstractVector`. This may share
