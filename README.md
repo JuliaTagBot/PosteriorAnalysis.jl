@@ -6,3 +6,5 @@
 [![codecov.io](http://codecov.io/github/tpapp/PosteriorAnalysis.jl/coverage.svg?branch=master)](http://codecov.io/github/tpapp/PosteriorAnalysis.jl?branch=master)
 
 Package to facilitate Bayesian posterior analysis (mostly posterior predictive checks). Work in progress.
+
+*Tamas K. Papp acknowledges support from the Jubiläumsfonds grant (16256) of the Austrian National Bank.*
